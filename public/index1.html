@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Monitoring System - Banda Aceh</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    
+    <!-- HLS.js for video streaming -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.10/hls.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="header">
+                <h1>CCTV MONITORING</h1>
+                <div class="subtitle">Banda Aceh Smart City</div>
+            </div>
+
+    <div class="auth-container">
+
+    <div class="auth-buttons" id="authButtons">
+        <button class="auth-btn login-btn" onclick="showLoginModal()">Login</button>
+        <button class="auth-btn admin-btn" onclick="showRegisterModal()">Daftar</button>
+                </div>
+                <div id="loggedInUser" style="display: none;">
+                    <div style="margin-bottom: 10px;">
+                        <strong>Selamat datang, <span id="userName"></span>!</strong>
+                        <span id="userRole" style="background: #667eea; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 5px;"></span>
+                    </div>
+                    <button class="auth-btn logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            <!-- Search -->
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Cari CCTV..." id="searchInput">
+                    <button class="search-btn" onclick="searchCCTV()">🔍</button>
+                    <button class="filter-btn" onclick="toggleFilter()">⚙️</button>
+                </div>
+            </div>
+
+            <!-- CCTV List -->
+            <div class="cctv-list" id="cctvList">
+                <!-- CCTV items will be populated here -->
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+            <button class="add-cctv-btn" id="addCctvBtn" onclick="showAddCctvModal()">+ Tambah CCTV</button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-center">
+            <div class="modal-content">
+                <h2>Login ke Sistem</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email:</label>
+                        <input type="email" id="loginEmail" required value="admin@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" required value="123456">
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" class="cancel-btn" onclick="closeLoginModal()">Batal</button>
+                        <button type="submit" class="save-btn">Login</button>
+                    </div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        Belum punya akun? <a href="javascript:void(0)" onclick="switchToRegister()">Daftar disini</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-center">
+             <div class="modal-content">
+                <h2>Daftar Akun Baru</h2>
+                    <form id="registerForm">
+                            <div class="form-group">
+                                <label for="registerName">Nama Lengkap:</label>
+                                <input type="text" id="registerName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerEmail">Email:</label>
+                                <input type="email" id="registerEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerPassword">Password:</label>
+                                <input type="password" id="registerPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerConfirmPassword">Konfirmasi Password:</label>
+                                <input type="password" id="registerConfirmPassword" required>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="button" class="cancel-btn" onclick="closeRegisterModal()">Batal</button>
+                                <button type="submit" class="save-btn">Daftar</button>
+                            </div>
+                            <div style="text-align: center; margin-top: 15px;">
+                                Sudah punya akun? <a href="javascript:void(0)" onclick="switchToLogin()">Login disini</a>
+                            </div>
+                        </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit CCTV Modal -->
+    <div class="modal" id="cctvModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Tambah CCTV Baru</h2>
+            <form id="cctvForm">
+                <div class="form-group">
+                    <label for="cctvName">Nama CCTV:</label>
+                    <input type="text" id="cctvName" required>
+                </div>
+                <div class="form-group">
+                    <label for="cctvLocation">Lokasi:</label>
+                    <input type="text" id="cctvLocation" required>
+                </div>
+                <div class="form-group">
+                    <label for="cctvLat">Latitude:</label>
+                    <input type="number" id="cctvLat" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label for="cctvLng">Longitude:</label>
+                    <input type="number" id="cctvLng" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label for="cctvStream">Stream URL (HLS/m3u8):</label>
+                    <input type="url" id="cctvStream" placeholder="https://example.com/stream.m3u8">
+                </div>
+                <div class="form-group">
+                    <label for="cctvDescription">Deskripsi:</label>
+                    <input type="text" id="cctvDescription" placeholder="Deskripsi CCTV">
+                </div>
+                <div class="form-group">
+                    <label for="cctvStatus">Status:</label>
+                    <select id="cctvStatus">
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                    </select>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="cancel-btn" onclick="closeCctvModal()">Batal</button>
+                    <button type="submit" class="save-btn">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-content">
+            <div class="video-header">
+                <h3 id="videoTitle">Live Stream CCTV</h3>
+                <button class="close-video" onclick="closeVideoModal()">&times;</button>
+            </div>
+            <video id="videoPlayer" controls autoplay muted></video>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="loading" id="loadingModal">
+        <div class="loading-spinner"></div>
+        <div>Loading...</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
