@@ -32,12 +32,12 @@ Sebelum menjalankan aplikasi ini, pastikan Anda sudah menginstal:
 Clone repository ini ke mesin lokal Anda menggunakan perintah berikut:
 ```bash
 git clone https://github.com/username/repository-name.git
-cd repository-name
+cd repository-name```
 
 ### 2. Instalasi Dependencies
 Setelah clone repository, instal dependensi yang diperlukan dengan menjalankan
 ```bash
-npm-install
+npm-install``
 
 ### 3. Menjalankan Backend
 Setelah konfigurasi selesai, jalankan server menggunakan perintah:
